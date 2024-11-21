@@ -1,0 +1,179 @@
+1. Membuat Database
+Penjelasan:
+Pada langkah ini, Anda membuat sebuah database menggunakan MySQL.
+Melalui antarmuka seperti phpMyAdmin atau perintah SQL, Anda menjalankan perintah CREATE DATABASE untuk membuat database baru.
+Contoh SQL:
+sql
+CREATE DATABASE nama_database;
+2. Membuat Table
+Penjelasan:
+Setelah database dibuat, langkah berikutnya adalah membuat tabel di dalam database tersebut.
+Anda mendefinisikan nama tabel, kolom-kolom, tipe data, dan properti lainnya seperti primary key.
+Contoh SQL:
+sql
+Copy code
+CREATE TABLE data_barang (
+    id_barang INT(10) AUTO_INCREMENT PRIMARY KEY,
+    kategori varchar (30),
+    nama varchar (50),
+    gambar varchar (100),
+    harga_beli int(8),
+    harga_jual int (8),
+    stok int(4)
+);
+3. Menambahkan Data (Add Data)
+Penjelasan:
+Data ditambahkan ke tabel menggunakan perintah SQL INSERT INTO.
+Anda menentukan tabel dan nilai yang ingin dimasukkan.
+Contoh SQL:
+sql
+Copy code
+INSERT INTO nama_table (nama, alamat, umur) 
+VALUES ('John Doe', 'Jl. Kebon Jeruk', 25);
+4. Membuat Program CRUD
+CRUD terdiri dari:
+
+Create: Menambahkan data baru.
+Read: Membaca dan menampilkan data.
+Update: Mengubah data yang sudah ada.
+Delete: Menghapus data.
+4.1 Membuat File Koneksi Database
+Penjelasan:
+File koneksi digunakan untuk menghubungkan aplikasi dengan database.
+File ini biasanya berisi informasi host, nama database, username, dan password.
+Kode PHP:
+php
+Copy code
+<?php
+$host = "localhost";
+$user = "root";
+$password = "";
+$database = "nama_database";
+
+$conn = mysqli_connect($host, $user, $password, $database);
+
+if (!$conn) {
+    die("Koneksi gagal: " . mysqli_connect_error());
+}
+?>
+4.2 Membuat File Index (Read Data)
+Penjelasan:
+File ini digunakan untuk membaca dan menampilkan data dari database.
+Menggunakan perintah SQL SELECT untuk mengambil data.
+Kode PHP:
+php
+Copy code
+<?php
+include 'koneksi.php';
+
+$query = "SELECT * FROM nama_table";
+$result = mysqli_query($conn, $query);
+?>
+
+<table>
+    <tr>
+        <th>gambar</th>
+        <th>Nama barang</th>
+        <th>kategori</th>
+        <th>harga jual</th>
+        <th>harga beli</th>
+        <th>stok</th>
+        <th>aksi</th>
+    </tr>
+    <?php while ($row = mysqli_fetch_assoc($result)): ?>
+    <tr>
+        <td><?= $row['gambar']; ?></td>
+        <td><?= $row['Nama barang']; ?></td>
+        <td><?= $row['kategori']; ?></td>
+        <td><?= $row['harga jual']; ?></td>
+         <td><?= $row['harga beli']; ?></td>
+          <td><?= $row['stok']; ?></td>
+           <td><?= $row['aksi']; ?></td>
+        <td>
+            <a href="edit.php?id=<?= $row['id']; ?>">Edit</a>
+            <a href="delete.php?id=<?= $row['id']; ?>">Hapus</a>
+        </td>
+    </tr>
+    <?php endwhile; ?>
+</table>
+4.3 Menambah Data (Create)
+Penjelasan:
+File ini berisi form HTML untuk menambahkan data baru ke database.
+Data dari form diproses dengan perintah INSERT INTO.
+Kode PHP:
+php
+Copy code
+<?php
+include 'koneksi.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $nama = $_POST['nama'];
+    $kategori = $_POST['kategori'];
+    $harga_jual = $_POST['harga_jual'];
+    $harga_beli = $_POST['harga_beli'];
+    $stok = $_POST['stok'];
+    $file_gambar = $_POST['file_gambar'];
+    $gambar = $_POST['gambar'];
+
+    $query = "INSERT INTO data_barang (nama, kategori, harga_jual, harga_beli, stok, file_gambar, gambar) VALUES ('$nama', '$kategori', '$harga_jual', '$harga_beli', '$stok', '$file_gambar', '$gambar')";
+    mysqli_query($conn, $query);
+    header('Location: index.php');
+}
+?>
+
+<form method="POST">
+    Nama: <input type="text" name="nama"><br>
+    Alamat: <textarea name="kategori"></textarea><br>
+    Umur: <input type="name" name="harga_jual"><br>
+    <button type="submit">Tambah</button>
+</form>
+4.4 Mengubah Data (Update)
+Penjelasan:
+File ini digunakan untuk mengedit data yang sudah ada.
+Data awal diambil berdasarkan id, kemudian diperbarui menggunakan perintah UPDATE.
+Kode PHP:
+php
+Copy code
+<?php
+include 'koneksi.php';
+
+$id = $_GET['id'];
+$query = "SELECT * FROM data_barang WHERE id = $id";
+$result = mysqli_query($conn, $query);
+$row = mysqli_fetch_assoc($result);
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $nama = $_POST['nama'];
+    $kategori = $_POST['kategori'];
+    $harga_jual = $_POST['harga_jual'];
+
+    $query = "UPDATE nama_table SET nama = '$nama', kategori = '$kategori', harga_jual = '$harga_jual' WHERE id = $id";
+    mysqli_query($conn, $query);
+    header('Location: index.php');
+}
+?>
+
+<form method="POST">
+    Nama: <input type="text" name="nama" value="<?= $row['nama']; ?>"><br>
+    Alamat: <textarea name="alamat"><?= $row['kategori']; ?></textarea><br>
+    Umur: <input type="number" name="umur" value="<?= $row['harga_jual']; ?>"><br>
+    <button type="submit">Update</button>
+</form>
+4.5 Menghapus Data (Delete)
+Penjelasan:
+File ini menghapus data berdasarkan id menggunakan perintah DELETE.
+Kode PHP:
+php
+Copy code
+<?php
+include 'koneksi.php';
+
+$id = $_GET['id'];
+$query = "DELETE FROM nama_table WHERE id = $id";
+mysqli_query($conn, $query);
+header('Location: index.php');
+?>
+5. Akses Direktori
+Penjelasan:
+File-file ini diatur dalam satu folder direktori.
+Untuk menjalankan aplikasi, akses folder melalui URL atau server lokal, misalnya http://localhost/nama_folder.
